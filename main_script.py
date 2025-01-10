@@ -55,9 +55,10 @@ try:
     address_row = 2  # Start with the first row for address details
     spreadsheet = client.open("App AI lead")  # Replace with your sheet's actual name
     sheet = spreadsheet.sheet1  # Access the first sheet in the file
-    row_number_inv = 1
+    esn_row = 1
+    imei_row = 1 
     
-    while tracker != 13:
+    while tracker != 20:
         try:
             # Outer loop starts with drawing the signature
             print("Drawing the signature...")
@@ -74,6 +75,7 @@ try:
                     print("Filling out demographic page...")
                     print(f"Processing row {row_number} with address from row {address_row}")
                     demographic_page(driver, row_number,address_row)
+                    time.sleep(1)
 
                     # Check for pop-up
                     if popup_check(driver):
@@ -100,11 +102,12 @@ try:
 
             # Input IMEI info
             print("Processing IMEI...")
-            finish_process(driver, row_number_inv)
+            finish_process(driver, esn_row, imei_row)
 
             # Highlight the row green on success
             highlight_row_green(sheet, row_number)
-            row_number_inv += 1
+            esn_row += 1
+            imei_row += 1
             tracker += 1
             address_row += 1
             print(f"Tracker updated: {tracker}")
@@ -117,7 +120,7 @@ try:
         except Exception as e:
             print(f"An error occurred: {e}")
         
-    print("16 apps finished.")
+    print("20 apps finished.")
     driver.quit()
 
 except Exception as e:
