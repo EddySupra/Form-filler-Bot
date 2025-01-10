@@ -77,6 +77,43 @@ def highlight_row_green(sheet, row_number):
         print(f"Row {row_number} has been highlighted in green.")
     except Exception as e:
         print(f"Error while highlighting row {row_number} in green: {e}")
+def highlight_cell_green(sheet, cell_reference):
+    """
+    Highlights the specified cell in the Google Sheet green.
+    :param sheet: Google Sheets worksheet object.
+    :param cell_reference: The cell reference to highlight (e.g., 'A1', 'B2').
+    """
+    try:
+        # Define the green background color
+        green_color = {"red": 0.0, "green": 1.0, "blue": 0.0}
+
+        # Create a batch update request for the cell background color
+        sheet.format(cell_reference, {
+            "backgroundColor": green_color
+        })
+
+        print(f"Cell {cell_reference} has been highlighted in green.")
+    except Exception as e:
+        print(f"Error while highlighting cell {cell_reference} in green: {e}")
+
+def highlight_cell_red(sheet, cell_reference):
+    """
+    Highlights the specified cell in the Google Sheet red.
+    :param sheet: Google Sheets worksheet object.
+    :param cell_reference: The cell reference to highlight (e.g., 'A1', 'B2').
+    """
+    try:
+        # Define the red background color
+        red_color = {"red": 1.0, "green": 0.0, "blue": 0.0}
+
+        # Create a batch update request for the cell background color
+        sheet.format(cell_reference, {
+            "backgroundColor": red_color
+        })
+
+        print(f"Cell {cell_reference} has been highlighted in red.")
+    except Exception as e:
+        print(f"Error while highlighting cell {cell_reference} in red: {e}")
 
 
 def setup_driver(service, options):
@@ -271,10 +308,10 @@ def eligibility_page(driver):
             # Click the BYOD NO button if it is not selected
             byod_button.click()
             print("BYOD NO button was not selected. It is now clicked.")
-            time.sleep(DELAY)
+            time.sleep(.5)
         else:
             print("BYOD NO is already selected.")
-            time.sleep(DELAY)
+            time.sleep(.5)
 
         # Another CA Enrollment Answer No
         another_ca_input = driver.find_element(By.CSS_SELECTOR, "input#AnotherCaEnrollmentAnswerNo")
@@ -282,10 +319,10 @@ def eligibility_page(driver):
             print("Another CA Enrollment Answer 'No' is not selected. Clicking it now.")
             another_ca_label = driver.find_element(By.CSS_SELECTOR, "label[for='AnotherCaEnrollmentAnswerNo']")
             another_ca_label.click()
-            time.sleep(DELAY)
+            time.sleep(.5)
         else:
             print("Another CA Enrollment Answer 'No' is already selected. Skipping.")
-            time.sleep(DELAY)
+            time.sleep(.5)
 
         # State Attestation Yes
         state_attestation_input = driver.find_element(By.CSS_SELECTOR, "input#stateAttestationYes")
@@ -293,7 +330,7 @@ def eligibility_page(driver):
             print("State Attestation 'Yes' is not selected. Clicking it now.")
             state_attestation_label = driver.find_element(By.CSS_SELECTOR, "label[for='stateAttestationYes']")
             state_attestation_label.click()
-            time.sleep(DELAY)
+            time.sleep(.5)
         else:
             print("State Attestation 'Yes' is already selected. Skipping.")
             
@@ -304,7 +341,7 @@ def eligibility_page(driver):
             print("Freeze Questions 'Yes' is not selected. Clicking it now.")
             freeze_questions_label = driver.find_element(By.CSS_SELECTOR, "label[for='freezeQuestionsYes']")
             freeze_questions_label.click()
-            time.sleep(DELAY)
+            time.sleep(.5)
         else:
             print("Freeze Questions 'Yes' is already selected. Skipping.")
             
@@ -316,7 +353,7 @@ def eligibility_page(driver):
             # Click the radio button if it is not selected
             isTribalNo.click()
             print("Radio button 'isTribalNo' was not selected. It is now clicked.")
-            time.sleep(DELAY)
+            time.sleep(.5)
         else:
             print("Radio button 'isTribalNo' is already selected.")
 
@@ -367,7 +404,7 @@ def demographic_page(driver, row_number,address_row):
             field_element = driver.find_element(selector_type, selector_value)
             field_element.clear()
             field_element.send_keys(field_info["value"])
-            time.sleep(1)
+            time.sleep(.5)
 
         print("Address fields populated successfully.")
 
@@ -386,19 +423,19 @@ def demographic_page(driver, row_number,address_row):
         month_dropdown_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[formcontrolname="month"]')))
         month_dropdown = Select(month_dropdown_element)
         month_dropdown.select_by_value(adjusted_month)
-        time.sleep(1)
+        time.sleep(.5)
 
         # Wait for and select the day
         day_dropdown_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[formcontrolname="day"]')))
         day_dropdown = Select(day_dropdown_element)
         day_dropdown.select_by_value(day.lstrip("0"))  # Remove leading zeros
-        time.sleep(1)
+        time.sleep(.5)
 
         # Wait for and select the year
         year_dropdown_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[formcontrolname="year"]')))
         year_dropdown = Select(year_dropdown_element)
         year_dropdown.select_by_value(year)
-        time.sleep(1)
+        time.sleep(.5)
 
         print("Date of Birth selected successfully.")
         
@@ -415,7 +452,7 @@ def demographic_page(driver, row_number,address_row):
             selector_type, selector_value = field_info["selector"]
             field_element = driver.find_element(selector_type, selector_value)
             field_element.send_keys(field_info["value"])
-            time.sleep(1)
+            time.sleep(.5)
         
 
 
@@ -435,12 +472,12 @@ def demographic_page(driver, row_number,address_row):
         # Press left arrow key 4 times
         for _ in range(4):
             ssn_field.send_keys(Keys.ARROW_LEFT)
-            time.sleep(0.1)  # Optional delay for visibility
+            time.sleep(1)  # Optional delay for visibility
 
         # Input the SSN character by character
         for char in ssn_value:
             ssn_field.send_keys(char)
-            time.sleep(1)
+            time.sleep(.7)
         
         print("SSN field successfully filled.")
 
@@ -451,32 +488,33 @@ def demographic_page(driver, row_number,address_row):
         # Billing Address
         BillingAddressLabel = driver.find_element(By.CSS_SELECTOR, 'label[for="billingAddressSame"]')
         BillingAddressLabel.click()
-        time.sleep(1)
+        
 
         # Permanent Address
         PermanentAddress = driver.find_element(By.CSS_SELECTOR, 'label[for="permanent"]')
         PermanentAddress.click()
-        time.sleep(1)
+        
 
         # Shipping Address
         ShippingAddress = driver.find_element(By.CSS_SELECTOR, 'label[for="shippingAddressSameResidence"]')
         ShippingAddress.click()
-        time.sleep(1)
+        
 
         # Email button
         Email = driver.find_element(By.CSS_SELECTOR, 'label[for="reachQuestionEmail"]')
         Email.click()
-        time.sleep(1)
+        
 
         #Wait for the checkbox to be present and visible
         marketing_checkbox = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "label[for='MarketingConsent']")))
         marketing_checkbox.click()
-        time.sleep(1)
+       
 
         #Next Page 
         next_button = driver.find_element(By.CSS_SELECTOR, "button.btn.submit-btn.step-btn")
         next_button.click()
         time.sleep(1)
+        
 
         # Call popup_check
         if popup_check(driver):
@@ -484,19 +522,12 @@ def demographic_page(driver, row_number,address_row):
             raise PopupCheckException()
 
 
-        #validation button
-        validation_button = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat')))
-        validation_button.click()
-        time.sleep(1)
-
-
         print("Demographic page finshed")
     except PopupCheckException:
         # Pass the exception to the caller to handle it
         raise    
     except Exception as e:
-        print("Error during form submission:", e)
+        print("Error during form demographic:", e)
         raise
 
 def popup_check(driver):
@@ -515,44 +546,80 @@ def popup_check(driver):
 
             # Handle the pop-up content
             if "currently this customer cannot apply in person" in normalized_text:
+                time.sleep(1)
                 driver.back()
                 print("Person cannot register at this time. Moving on to next.")
-                time.sleep(2)
+                time.sleep(1)
 
                 return True
             elif "in order to continue this enrollment with entouch" in normalized_text:
+                time.sleep(1)
                 print("please have the customer contact Enrollment Support .")
                 driver.back()
-                time.sleep(2)
+                time.sleep(1)
                 return True
             elif "duplicate customer found in entouch wireless" in normalized_text:
                 print("duplicate customer found entouch.")
                 driver.back()
-                time.sleep(2)
+                time.sleep(1)
                 return True
             elif "currently receiving the benefit" in normalized_text:
                 print("Someone at the address is already receiving the benefit.")
+                # Wait for the button to be clickable
+                time.sleep(1)
+                ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
+
+                # Click the button
+                time.sleep(1)
+                ok_button.click()
+                time.sleep(1)
+                print("OK button clicked successfully.")
+                popup_check(driver)  # Ensure this function exists and is defined.
+            elif "someone at the address provided is currently receiving" in normalized_text:
+                print ("Someone at the address is already receiving the benefit")
+                # Wait for the button to be clickable
+                time.sleep(1)
+                ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
+
+                # Click the button
+                time.sleep(1)
+                ok_button.click()
+                time.sleep(1)
+                print("OK button clicked successfully.")
+
+            elif "you are already receiving a lifeline discount benefit" in normalized_text:
+                print("Transfer is available.")
+                # Wait for the "Yes" button to be clickable
+                yes_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[text()='Yes' and @class='btn btn-flat' and @type='button']"))
+                )
+                # Click the button
+                time.sleep(1)
+                yes_button.click()
+                time.sleep(1)
+                print("Yes button clicked successfully.")
+                return False
+            elif " an error has occurred " in normalized_text:
+                print("application error has occured ")
+                driver.back()
+                return True
+
+            elif "the california lifeline administrator has determined you already have an application" in normalized_text:
+                print("already a user")
+                driver.back()
+                return True
+            elif "validation successful" in normalized_text:
+                print("validation successful")
                 # Wait for the button to be clickable
                 ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
 
                 # Click the button
                 ok_button.click()
-                print("OK button clicked successfully.")
-                popup_check(driver)  # Ensure this function exists and is defined.
-            elif "someone at the address provided is currently receiving" in normalized_text:
-                print ("Someone at the address is already receiving the benefit")
-                return False
-
-            elif "you are already receiving a lifeline discount benefit" in normalized_text:
-                print("Transfer is available.")
-                # Wait for the "Yes" button to be clickable
-                yes_button = WebDriverWait(driver, 30).until(
-                    EC.element_to_be_clickable((By.XPATH, "//button[text()='Yes' and @class='btn btn-flat' and @type='button']"))
-                )
-                # Click the button
-                yes_button.click()
-                print("Yes button clicked successfully.")
-                return False
+                time.sleep(1) 
+            elif "there was a problem processing your order. Please try again, if the problem persists please contact entouch wireless" in normalized_text:
+                print("problem processing order")
+                driver.back()
+                return True
             else:
                 print("Unhandled pop-up message detected.")
                 return False
@@ -564,40 +631,38 @@ def disclosures_page(driver):
     try:
         print('disclosures page started')
 
-        # Try to locate and click 'IehAnotherAdultYes'
         try:
+            # Locate and click 'IehAnotherAdultYes' radio button
             IehAnotherAdult = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'label[for="IehAnotherAdultYes"]'))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehAnotherAdultYes"]'))
             )
             IehAnotherAdult.click()
             print("Clicked the 'IehAnotherAdultYes' radio button successfully.")
-            time.sleep(1)
         except TimeoutException:
             print("'IehAnotherAdultYes' radio button not found. Continuing...")
 
-        # Try to locate and click 'IehDiscountNo'
         try:
-            IehDiscount = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'label[for="IehDiscountNo"]'))
+            # Locate and click 'IehDiscountNo' radio button
+            IehDiscount = WebDriverWait(driver, 1).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehDiscountNo"]'))
             )
             IehDiscount.click()
             print("Clicked the 'IehDiscountNo' radio button successfully.")
         except TimeoutException:
             print("'IehDiscountNo' radio button not found. Continuing...")
 
-        # Try to locate and click the 'Ok' button
         try:
-            ok_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]'))
+            # Locate and click the 'Ok' button
+            ok_button = WebDriverWait(driver, 1).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]'))
             )
             ok_button.click()
             print("Clicked the 'Ok' button successfully.")
         except TimeoutException:
             print("'Ok' button not found. Continuing...")
-
         # Try to locate and click the 'CertificationB' checkbox
         try:
-            certification_checkbox = WebDriverWait(driver, 10).until(
+            certification_checkbox = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'label[for="CertificationB"]'))
             )
             certification_checkbox.click()
@@ -617,7 +682,7 @@ def disclosures_page(driver):
 
         try:
             # Locate all disclosure labels at once
-            labels = WebDriverWait(driver, 15).until(
+            labels = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, ', '.join([f'label[for="{d}"]' for d in disclosure_selectors])))
             )
 
@@ -643,7 +708,7 @@ def disclosures_page(driver):
         except TimeoutException:
             print("'I Accept' button not found. Continuing...")
         print ("Disclosure page done")
-        time.sleep(DELAY)
+        time.sleep(1)
         
     except Exception as e:
         print("Error during elegiblity", e)
@@ -653,9 +718,10 @@ def service_type_check(driver):
         print("Checking service type page...")
         try:
             # Check if the element exists
-            current_esn = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentEsn"]')))
-            print("Instant Approval")
-            return  # Exit the function if the element is found
+            current_esn = WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentEsn"]')))
+            if current_esn:
+                print("Instant Approval")
+                return  # Exit the function if the element is found
         except TimeoutException:
             print("not instant approval")
 
@@ -670,13 +736,13 @@ def service_type_check(driver):
             print("Navigated back once.")
 
             # Pause briefly to ensure the page loads
-            time.sleep(2)
+            time.sleep(1)
 
             # Navigate back a second time
             driver.back()
             print("Navigated back twice.")
 
-            time.sleep(2)
+            time.sleep(1)
 
             # Navigate back a third time
             driver.back()
@@ -690,7 +756,7 @@ def service_type_check(driver):
     except Exception as e:
         print("Service type page check error or element not found.")
 
-def finish_process(driver, row_number_inv):
+def finish_process(driver, esn_row, imei_row):
     try:
         print("Input IMEI")
         
@@ -712,87 +778,136 @@ def finish_process(driver, row_number_inv):
 
             inventory_spreadsheet = client.open("b1i")  # Replace with your sheet's actual name
             inv_sheet = inventory_spreadsheet.sheet1  # Access the first sheet in the file
-            row_inv = inv_sheet.row_values(row_number_inv)  # Retrieve the row based on row_number
-            print(f"Row {row_number_inv} pulled: {row_inv}")
-        except Exception as e:
-            print(f"Error accessing Google Sheet or fetching row {row_number_inv}: {e}")
-            return
+            esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on esn_row_number
+           
 
-        # Locate the 'CurrentEsn' input box
-        try:
-            textbox = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "input[formcontrolname='CurrentEsn']"))
-            )
-            textbox.click()
-            textbox.send_keys(row_inv[0])
-            print("Entered IMEI into 'CurrentEsn' input box.")
-            time.sleep(1)
+            print(f"Row {esn_row} pulled: {esn_row_inv[0]}")
         except Exception as e:
-            print(f"Error locating or interacting with 'CurrentEsn': {e}")
+            print(f"Error accessing Google Sheet or fetching row {esn_row}: {e}")
             return
+        esn_not_valid = True
+        while esn_not_valid == True:
+            esn_row +=1
+            esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on imei_row_number
+            print(f"Row {esn_row} pulled: {esn_row_inv[1]}")
+            # Locate the 'CurrentEsn' input box
+            try:
+                textbox = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "input[formcontrolname='CurrentEsn']"))
+                )
+                textbox.click()
+                textbox.send_keys(esn_row_inv[0])
+                print("Entered IMEI into 'CurrentEsn' input box.")
+                time.sleep(1)
+            except Exception as e:
+                print(f"Error locating or interacting with 'CurrentEsn': {e}")
+                return
 
-        # Validate IMEI
-        try:
-            validate_button = WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat.validate-btn"))
-            )
-            validate_button.click()
-            print("Clicked the 'Validate' button.")
-            time.sleep(1)
-        except Exception as e:
-            print(f"Error clicking 'Validate' button: {e}")
-            return
+            # Validate IMEI
+            try:
+                validate_button = WebDriverWait(driver, 20).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat.validate-btn"))
+                )
+                validate_button.click()
+                print("Clicked the 'Validate' button.")
+                time.sleep(1)
+            except Exception as e:
+                print(f"Error clicking 'Validate' button: {e}")
+                return
 
-        # Handle 'OK' button
-        try:
-            ok_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]'))
-            )
-            ok_button.click()
-            print("Clicked the 'OK' button.")
-            time.sleep(1)
-        except Exception as e:
-            print(f"Error clicking 'OK' button: {e}")
-            return
+            # Handle 'OK' button
+            try:
+                time.sleep(1)    
+                # Wait for the modal to appear
+                modal = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "modal-dialog"))
+                )
+                # Find the element containing the text
+                modal_text = modal.find_element(By.CSS_SELECTOR, "div.modal-body > p").text
+                time.sleep(1)    
+                
+                if "not found" in modal_text:
+                    print("esn not found. Taking appropriate action.")
+                    # Example: Click the OK button
+                    ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))
+                    time.sleep(1)      
+                    ok_button.click()
+                    time.sleep(1)
+                    highlight_cell_red(inv_sheet,esn_row_inv[1])    
+                    esn_not_valid = True   
+                else:
+                    print("Modal text does not contain 'not found'.")
+                    # Example: Click the OK button
+                    ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))      
+                    ok_button.click()
+                    highlight_cell_green(inv_sheet, esn_row_inv[1])
+                    esn_not_valid = False
+            except Exception as e:
+                print("Error handling 'not found' modal:", e)
 
         # Handle 'CurrentImei' input
-        try:
-            current_imei_input = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentImei"]'))
-            )
-            current_imei_input.send_keys(row_inv[1])
-            print("Entered IMEI into 'CurrentImei' input field.")
-            time.sleep(3)
-        except Exception as e:
-            print(f"Error interacting with 'CurrentImei': {e}")
-            return
-        
-        try:
-            # Wait for the button to become enabled
-            validate_button1 = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.XPATH, "/html/body/app-root/div[1]/div/section/app-service-type/form/div/div[2]/div[1]/div[3]/button"))
-            )
-            WebDriverWait(driver, 20).until(
-                lambda driver: validate_button1.get_attribute("disabled") is None
-            )
+        imei_not_valid = True
+        while imei_not_valid == True:
+            imei_row +=1
+            imei_row_inv = inv_sheet.row_values(imei_row)  # Retrieve the esn row based on imei_row_number
+            print(f"Row {imei_row} pulled: {imei_row_inv[1]}")
 
-            # Force-click using JavaScript
-            driver.execute_script("arguments[0].click();", validate_button1)
-            print("Clicked the 'Validate' button using JavaScript.")
-        except TimeoutException:
-            print("'Validate' button not clickable or not found.")
+            try:
+                current_imei_input = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentImei"]'))
+                )
+                current_imei_input.click()
+                current_imei_input.clear()
+                time.sleep(1)
+                current_imei_input.send_keys(imei_row_inv[1])
+                print("Entered IMEI into 'CurrentImei' input field.")
+                time.sleep(1)
+            except Exception as e:
+                print(f"Error interacting with 'CurrentImei': {e}")
+                return
+            
+            try:
+                # Wait for the button to become enabled
+                validate_button1 = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.XPATH, "/html/body/app-root/div[1]/div/section/app-service-type/form/div/div[2]/div[1]/div[3]/button"))
+                )
+                WebDriverWait(driver, 20).until(
+                    lambda driver: validate_button1.get_attribute("disabled") is None
+                )
 
-        try:
-            # Locate the 'OK' button
-            ok_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]'))
-            )
-            # Click the 'OK' button
-            ok_button.click()
-            print("Clicked the 'OK' button successfully.")
-            time.sleep(1)
-        except TimeoutException:
-            print("'OK' button not found. Continuing...")
+                # Force-click using JavaScript
+                driver.execute_script("arguments[0].click();", validate_button1)
+                print("Clicked the 'Validate' button using JavaScript.")
+            except TimeoutException:
+                print("'Validate' button not clickable or not found.")
+            try:
+                time.sleep(1)    
+                # Wait for the modal to appear
+                modal = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "modal-dialog"))
+                )
+                # Find the element containing the text
+                modal_text = modal.find_element(By.CSS_SELECTOR, "div.modal-body > p").text
+                time.sleep(1)    
+                
+                if "not found" in modal_text:
+                    print("IMEI not found. Taking appropriate action.")
+                    # Example: Click the OK button
+                    ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))
+                    time.sleep(1)      
+                    ok_button.click()
+                    time.sleep(1)
+                    highlight_cell_red(inv_sheet,imei_row_inv[1])    
+                    imei_not_valid = True   
+                else:
+                    print("Modal text does not contain 'not found'.")
+                    # Example: Click the OK button
+                    ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))      
+                    ok_button.click()
+                    highlight_cell_green(inv_sheet, imei_row_inv[1])
+                    imei_not_valid = False
+            except Exception as e:
+                print("Error handling 'not found' modal:", e)
 
         # Handle PIN input
         try:
@@ -866,7 +981,7 @@ def finish_process(driver, row_number_inv):
             return
         print ("order complete wait 7-8 min and new app will start")
         
-        highlight_row_green(inv_sheet,row_number_inv)
+        highlight_row_green(inv_sheet,esn_row)
         
         #timer inbetween apps
         time.sleep(random.randint(420,480))
