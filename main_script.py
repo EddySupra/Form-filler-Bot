@@ -31,7 +31,7 @@ except ValueError:
     exit(1)
 
 # Set up ChromeDriver service
-chrome_service = Service("C:\\Users\\casas\\Desktop\\chromedriver-win64\\chromedriver.exe")
+chrome_service = Service("C:\\Users\\maste\\OneDrive\\Desktop\\chromedriver-win64\\chromedriver.exe")
 chrome_options = Options()
 chrome_options.add_argument("--incognito")
 
@@ -49,11 +49,11 @@ try:
     speed_test(driver)
 
     # Log in to the application
-    login(driver, "V1_ShijuanaTinoco1", "Water123!!")
+    login(driver, "V1_JessicaNicholeFrederick", "Water123!!")
 
     row_number = 1  # Start with the first row
     address_row = 2  # Start with the first row for address details
-    spreadsheet = client.open("App AI lead")  # Replace with your sheet's actual name
+    spreadsheet = client.open("Jessica Nichole Frederick Leads")  # Replace with your sheet's actual name
     sheet = spreadsheet.sheet1  # Access the first sheet in the file
     esn_row = 1
     imei_row = 1 
