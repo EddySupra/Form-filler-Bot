@@ -235,7 +235,7 @@ def draw_signature(driver):
         canvas.click()
 
         # Generate and inject JavaScript
-        signature_js = generate_signature_js("C:\\Users\\casas\\Desktop\\1111.png")
+        signature_js = generate_signature_js("C:\\Users\\maste\\OneDrive\\Desktop\\sig.png")
         driver.execute_script(signature_js)
         print("Signature added successfully.")
         
@@ -244,7 +244,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's first name
         first_name_input.clear()
-        first_name_input.send_keys("shijuana")
+        first_name_input.send_keys("Jessica Nichole")
         print("Agent's first name entered successfully.")
         time.sleep(DELAY)
 
@@ -253,7 +253,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's last name
         last_name_input.clear()
-        last_name_input.send_keys("tinoco")
+        last_name_input.send_keys("Frederick")
         print("Agent's last name entered successfully.")
         time.sleep(DELAY)
 
@@ -262,7 +262,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's location
         location_input.clear()
-        location_input.send_keys("Bell")
+        location_input.send_keys("Los Angeles")
         print("Agent's location entered successfully.")
         time.sleep(DELAY)
 
@@ -271,7 +271,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's address
         address_input.clear()
-        address_input.send_keys("6801 Atlantic Ave")
+        address_input.send_keys("8137 S. Vermont St")
         print("Agent's address entered successfully.")
         time.sleep(DELAY)
 
@@ -383,7 +383,7 @@ def eligibility_page(driver):
 def demographic_page(driver, row_number,address_row):
     try:
         # Access the Google Sheet
-        spreadsheet = client.open("App AI lead")  # Replace with your sheet's actual name
+        spreadsheet = client.open("Jessica Nichole Frederick Leads")  # Replace with your sheet's actual name
         sheet = spreadsheet.sheet1  # Access the first sheet in the file
         row_data = sheet.row_values(row_number)  # Retrieve the row based on row_number
         address_data = sheet.row_values(address_row)  # Address details
@@ -563,6 +563,10 @@ def popup_check(driver):
                 driver.back()
                 time.sleep(1)
                 return True
+            elif "we are unable to enroll you in the federal program" in normalized_text:
+                print("application error has occured ")
+                driver.back()
+                return True
             elif "currently receiving the benefit" in normalized_text:
                 print("Someone at the address is already receiving the benefit.")
                 # Wait for the button to be clickable
@@ -574,7 +578,7 @@ def popup_check(driver):
                 ok_button.click()
                 time.sleep(1)
                 print("OK button clicked successfully.")
-                popup_check(driver)  # Ensure this function exists and is defined.
+                
             elif "someone at the address provided is currently receiving" in normalized_text:
                 print ("Someone at the address is already receiving the benefit")
                 # Wait for the button to be clickable
@@ -620,6 +624,14 @@ def popup_check(driver):
                 print("problem processing order")
                 driver.back()
                 return True
+            elif "we were unable to process your request" in normalized_text:
+                # Wait for the button to be clickable
+                ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
+
+                # Click the button
+                ok_button.click()
+                time.sleep(1)
+                popup_check(driver)
             else:
                 print("Unhandled pop-up message detected.")
                 return False
@@ -776,7 +788,7 @@ def finish_process(driver, esn_row, imei_row):
             client = gspread.authorize(creds)
             print("Google Sheets access authorized successfully.")
 
-            inventory_spreadsheet = client.open("b1i")  # Replace with your sheet's actual name
+            inventory_spreadsheet = client.open("Jessica Nichole Frederick Inv")  # Replace with your sheet's actual name
             inv_sheet = inventory_spreadsheet.sheet1  # Access the first sheet in the file
             esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on esn_row_number
            
