@@ -21,7 +21,8 @@ import numpy as np
 import re
 from PIL import Image
 import base64
-
+from pywinauto import Application
+import os
 
 
 # Google Sheets API setup
@@ -235,7 +236,7 @@ def draw_signature(driver):
         canvas.click()
 
         # Generate and inject JavaScript
-        signature_js = generate_signature_js("C:\\Users\\maste\\OneDrive\\Desktop\\sig.png")
+        signature_js = generate_signature_js("C:\\Users\\casas\\Desktop\\a sig .png")
         driver.execute_script(signature_js)
         print("Signature added successfully.")
         
@@ -244,7 +245,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's first name
         first_name_input.clear()
-        first_name_input.send_keys("Jessica Nichole")
+        first_name_input.send_keys("Andrew Carrillo")
         print("Agent's first name entered successfully.")
         time.sleep(DELAY)
 
@@ -253,7 +254,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's last name
         last_name_input.clear()
-        last_name_input.send_keys("Frederick")
+        last_name_input.send_keys("Blackhorse")
         print("Agent's last name entered successfully.")
         time.sleep(DELAY)
 
@@ -262,7 +263,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's location
         location_input.clear()
-        location_input.send_keys("Los Angeles")
+        location_input.send_keys("Winnetka")
         print("Agent's location entered successfully.")
         time.sleep(DELAY)
 
@@ -271,7 +272,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's address
         address_input.clear()
-        address_input.send_keys("8137 S. Vermont St")
+        address_input.send_keys("19725 Vanowen St")
         print("Agent's address entered successfully.")
         time.sleep(DELAY)
 
@@ -383,7 +384,7 @@ def eligibility_page(driver):
 def demographic_page(driver, row_number,address_row):
     try:
         # Access the Google Sheet
-        spreadsheet = client.open("Jessica Nichole Frederick Leads")  # Replace with your sheet's actual name
+        spreadsheet = client.open("Shijuana Tinoco Leads")  # Replace with your sheet's actual name
         sheet = spreadsheet.sheet1  # Access the first sheet in the file
         row_data = sheet.row_values(row_number)  # Retrieve the row based on row_number
         address_data = sheet.row_values(address_row)  # Address details
@@ -401,7 +402,7 @@ def demographic_page(driver, row_number,address_row):
         for field_name, field_info in address_fields.items():
             print(f"Filling out field: {field_name}")
             selector_type, selector_value = field_info["selector"]
-            field_element = driver.find_element(selector_type, selector_value)
+            field_element =  WebDriverWait(driver, 20).until(EC.presence_of_element_located((selector_type, selector_value)))
             field_element.clear()
             field_element.send_keys(field_info["value"])
             time.sleep(.5)
@@ -533,7 +534,7 @@ def demographic_page(driver, row_number,address_row):
 def popup_check(driver):
     try:
         # Wait for the presence of the pop-up
-        popup = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.modal-dialog")))
+        popup = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.modal-dialog")))
         if popup:
             print("Pop-up detected")
 
@@ -550,22 +551,19 @@ def popup_check(driver):
                 driver.back()
                 print("Person cannot register at this time. Moving on to next.")
                 time.sleep(1)
-
                 return True
+            
             elif "in order to continue this enrollment with entouch" in normalized_text:
                 time.sleep(1)
                 print("please have the customer contact Enrollment Support .")
                 driver.back()
                 time.sleep(1)
                 return True
+            
             elif "duplicate customer found in entouch wireless" in normalized_text:
                 print("duplicate customer found entouch.")
                 driver.back()
                 time.sleep(1)
-                return True
-            elif "we are unable to enroll you in the federal program" in normalized_text:
-                print("application error has occured ")
-                driver.back()
                 return True
             elif "currently receiving the benefit" in normalized_text:
                 print("Someone at the address is already receiving the benefit.")
@@ -590,7 +588,15 @@ def popup_check(driver):
                 ok_button.click()
                 time.sleep(1)
                 print("OK button clicked successfully.")
+                # Ensure this function exists and is defined.
 
+            elif "the california lifeline administrator has determined you already have service with another lifeline carrier" in normalized_text:
+                print("already regisiterd in last 60 days")
+                time.sleep(1)
+                driver.back()
+                time.sleep(1)
+                return True
+                
             elif "you are already receiving a lifeline discount benefit" in normalized_text:
                 print("Transfer is available.")
                 # Wait for the "Yes" button to be clickable
@@ -624,14 +630,9 @@ def popup_check(driver):
                 print("problem processing order")
                 driver.back()
                 return True
-            elif "we were unable to process your request" in normalized_text:
-                # Wait for the button to be clickable
-                ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
+            elif "we were unable to confirm the address provided with the united states postal service" in normalized_text:
+                print("bad address!")
 
-                # Click the button
-                ok_button.click()
-                time.sleep(1)
-                popup_check(driver)
             else:
                 print("Unhandled pop-up message detected.")
                 return False
@@ -645,7 +646,7 @@ def disclosures_page(driver):
 
         try:
             # Locate and click 'IehAnotherAdultYes' radio button
-            IehAnotherAdult = WebDriverWait(driver, 10).until(
+            IehAnotherAdult = WebDriverWait(driver, 15).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehAnotherAdultYes"]'))
             )
             IehAnotherAdult.click()
@@ -725,9 +726,61 @@ def disclosures_page(driver):
     except Exception as e:
         print("Error during elegiblity", e)
         raise
-def service_type_check(driver):
+
+def wait_for_user():
+    print("Waiting... Type 'good' to proceed.")
+    while True:
+        user_input = input("Type 'good' to continue: ").strip().lower()
+        if user_input == "good":
+            break  # Exit loop when "good" is entered
+        
+
+
+def upload_file(driver, file_path):
+    try:
+        time.sleep(1)
+        upload_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/div[1]/div/section/app-image-capture/div/form/div/div[2]/div/div/div/div/label")))
+        time.sleep(1)
+        upload_button.click()
+        print("Upload button clicked.")
+        
+        time.sleep(2)  # Wait for the file dialog to appear
+
+        # Step 2: Use Pywinauto to handle the file dialog
+        app = Application().connect(title_re="Open")  # Matches window title (varies by OS)
+        file_dialog = app.window(title_re="Open")
+
+        # Step 3: Enter the file path
+        file_dialog.Edit.type_keys(file_path, with_spaces=True)
+
+        # Step 4: Click the "Open" button
+        file_dialog.Open.click()
+        print("File uploaded successfully.")
+
+    except Exception as e:
+        print("Error uploading file:", e)
+
+def get_random_jpg(folder_path):
+    """
+    Picks a random .jpg file from the given folder.
+    
+    :param folder_path: Path to the folder containing .jpg images.
+    :return: Full path of a randomly selected .jpg file.
+    """
+    try:
+        jpg_files = [f for f in os.listdir(folder_path) if f.lower().endswith('.jpg')]
+        if not jpg_files:
+            raise FileNotFoundError("No .jpg files found in the folder.")
+        return os.path.join(folder_path, random.choice(jpg_files))
+    except Exception as e:
+        print(f"Error selecting random image: {e}")
+        return None
+
+
+def service_type_check(driver,file_path):
     try:
         print("Checking service type page...")
+        '''
         try:
             # Check if the element exists
             current_esn = WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentEsn"]')))
@@ -736,35 +789,76 @@ def service_type_check(driver):
                 return  # Exit the function if the element is found
         except TimeoutException:
             print("not instant approval")
+        '''
 
 
-        heading = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h2.title")))
-        if heading:
-            print("Required CAL FRESH PICTURE found. Restarting the application process.")
+        try:
+            # Check for "Proof of Identification"
+            proof_id_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Identification')]")))
+            if proof_id_element and "Proof of Identification" in proof_id_element.text:
+                print("Proof of Identification, cannot run app")
+                # Navigate back once
+                driver.back()
+                print("Navigated back once.")
 
-            # Navigate back once
-            driver.back()
-            print("Navigated back once.")
+                # Pause briefly to ensure the page loads
+                time.sleep(1)
 
-            # Pause briefly to ensure the page loads
-            time.sleep(1)
+                # Navigate back a second time
+                driver.back()
+                print("Navigated back twice.")
 
-            # Navigate back a second time
-            driver.back()
-            print("Navigated back twice.")
+                time.sleep(1)
 
-            time.sleep(1)
+                # Navigate back a third time
+                driver.back()
+                print("Navigated back three times.")
 
-            # Navigate back a third time
-            driver.back()
-            print("Navigated back three times.")
+                return True  # Indicate the element was found
+        except:
+            pass  # Move to next check if element is not found
 
-            return True  # Indicate the element was found
-        else:
+        try:
+            # Check for "Proof of Identification"
+            proof_calfresh_element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'CalFresh')]")))
+            if proof_calfresh_element and "CalFresh" in proof_calfresh_element.text:
+                print("Proof of CALFRESH, cannot run app")
+                # Navigate back once
+                driver.back()
+                print("Navigated back once.")
 
-            print("instant approval, continue")
-            return False
+                # Pause briefly to ensure the page loads
+                time.sleep(1)
+
+                # Navigate back a second time
+                driver.back()
+                print("Navigated back twice.")
+
+                time.sleep(1)
+
+                # Navigate back a third time
+                driver.back()
+                print("Navigated back three times.")
+
+                return True  # Indicate the element was found
+        except:
+            pass  # Move to next check if element is not found
+        
+
+        try:
+            # Check for "Agent Selfie"
+            agent_selfie_element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Agent Selfie')]")))
+            if agent_selfie_element and "Agent Selfie" in agent_selfie_element.text:
+                print ("Agent Selfie Only, good app")
+                time.sleep(1)
+                print("start code for image input")
+                upload_file(driver, file_path)
+
+                print("please click submit button")
+                return False
+        except:
+            print ("error cannont detect image capture type")
+   
     except Exception as e:
         print("Service type page check error or element not found.")
 
@@ -788,7 +882,7 @@ def finish_process(driver, esn_row, imei_row):
             client = gspread.authorize(creds)
             print("Google Sheets access authorized successfully.")
 
-            inventory_spreadsheet = client.open("Jessica Nichole Frederick Inv")  # Replace with your sheet's actual name
+            inventory_spreadsheet = client.open("Shijuana Tinoco Inv")  # Replace with your sheet's actual name
             inv_sheet = inventory_spreadsheet.sheet1  # Access the first sheet in the file
             esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on esn_row_number
            
@@ -991,12 +1085,12 @@ def finish_process(driver, esn_row, imei_row):
         except Exception as e:
             print(f"Error clicking 'Submit Order' button: {e}")
             return
-        print ("order complete wait 7-8 min and new app will start")
+        print ("order complete wait 5-6 min and new app will start")
         
         highlight_row_green(inv_sheet,esn_row)
         
         #timer inbetween apps
-        time.sleep(random.randint(420,480))
+        time.sleep(random.randint(300,360))
         
         # Locate the 'New Order' link using its attributes
         new_order_link = WebDriverWait(driver, 10).until(
