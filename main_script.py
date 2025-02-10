@@ -31,13 +31,16 @@ except ValueError:
     exit(1)
 
 # Set up ChromeDriver service
-chrome_service = Service("C:\\Users\\maste\\OneDrive\\Desktop\\chromedriver-win64\\chromedriver.exe")
+chrome_service = Service("C:\\Users\\casas\\Desktop\\chromedriver-win64\\chromedriver.exe")
 chrome_options = Options()
-chrome_options.add_argument("--incognito")
 
 # Initialize the driver with geolocation
 driver = setup_driver_with_geolocation(chrome_service, chrome_options, latitude, longitude)
 tracker = 0 #complete application tracker
+
+#file_path = "C:\\Users\\casas\\Desktop\\IMG_0472.jpg"
+
+folder_path = "C:\\path\\to\\your\\images"  # Change to your actual folder path
 
 try:
     # Open the application page
@@ -49,11 +52,11 @@ try:
     speed_test(driver)
 
     # Log in to the application
-    login(driver, "V1_JessicaNicholeFrederick", "Water123!!")
+    login(driver, "V1_AndrewCarrilloBlackhorse", "Water123!!")
 
     row_number = 1  # Start with the first row
     address_row = 2  # Start with the first row for address details
-    spreadsheet = client.open("Jessica Nichole Frederick Leads")  # Replace with your sheet's actual name
+    spreadsheet = client.open("Shijuana Tinoco Leads")  # Replace with your sheet's actual name
     sheet = spreadsheet.sheet1  # Access the first sheet in the file
     esn_row = 1
     imei_row = 1 
@@ -67,6 +70,8 @@ try:
             restart_eligibility = True
             while restart_eligibility:
                 try:
+                    file_path = get_random_jpg(folder_path)
+
                     # Increment row_number for each new person
                     row_number += 1
                     print("Filling out eligibility page...")
@@ -81,13 +86,14 @@ try:
                     if popup_check(driver):
                         print('Cannot register this person, starting eligibility again.')
                         highlight_row_red(sheet, row_number)
+                        restart_eligibility = True  # Explicitly restart eligibility loop
                         continue  # Restart eligibility process
 
                     print("Filling out disclosures page...")
                     disclosures_page(driver)
 
                     # Check service type
-                    if service_type_check(driver):
+                    if service_type_check(driver, file_path):
                         print("Service type issue, restarting from eligibility.")
                         highlight_row_red(sheet, row_number)
                         continue  # Restart eligibility process
@@ -99,6 +105,15 @@ try:
                     print(f"An error occurred during eligibility steps: {e}")
                     highlight_row_red(sheet, row_number)
                     continue  # Restart eligibility process
+
+          
+
+            # Example usage
+            print("Pausing execution...")
+            time.sleep(1)
+            wait_for_user()
+            time.sleep(1)
+            print("Resuming script...")
 
             # Input IMEI info
             print("Processing IMEI...")
