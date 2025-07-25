@@ -35,7 +35,7 @@ print("Google Sheets access")
 
 
 # Delay for program actions 2 - 4 secconds 
-DELAY = random.randint(2, 4)
+DELAY = .5
 
 class PopupCheckException(Exception):
     """Raised when a pop-up is detected during demographic_page processing."""
@@ -78,48 +78,31 @@ def highlight_row_green(sheet, row_number):
         print(f"Row {row_number} has been highlighted in green.")
     except Exception as e:
         print(f"Error while highlighting row {row_number} in green: {e}")
-def highlight_cell_green(sheet, cell_reference):
+
+def highlight_row_blue(sheet, row_number):
     """
-    Highlights the specified cell in the Google Sheet green.
+    Highlights the specified row in the Google Sheet blue.
     :param sheet: Google Sheets worksheet object.
-    :param cell_reference: The cell reference to highlight (e.g., 'A1', 'B2').
+    :param row_number: The row number to highlight (1-indexed).
     """
     try:
-        # Define the green background color
-        green_color = {"red": 0.0, "green": 1.0, "blue": 0.0}
+        # Define the blue background color
+        blue_color = {"red": 0.0, "green": 0.0, "blue": 1.0}
 
-        # Create a batch update request for the cell background color
-        sheet.format(cell_reference, {
-            "backgroundColor": green_color
+        # Create a batch update request for row background color
+        sheet.format(f"{row_number}:{row_number}", {
+            "backgroundColor": blue_color
         })
 
-        print(f"Cell {cell_reference} has been highlighted in green.")
+        print(f"Row {row_number} has been highlighted in blue.")
     except Exception as e:
-        print(f"Error while highlighting cell {cell_reference} in green: {e}")
-
-def highlight_cell_red(sheet, cell_reference):
-    """
-    Highlights the specified cell in the Google Sheet red.
-    :param sheet: Google Sheets worksheet object.
-    :param cell_reference: The cell reference to highlight (e.g., 'A1', 'B2').
-    """
-    try:
-        # Define the red background color
-        red_color = {"red": 1.0, "green": 0.0, "blue": 0.0}
-
-        # Create a batch update request for the cell background color
-        sheet.format(cell_reference, {
-            "backgroundColor": red_color
-        })
-
-        print(f"Cell {cell_reference} has been highlighted in red.")
-    except Exception as e:
-        print(f"Error while highlighting cell {cell_reference} in red: {e}")
+        print(f"Error while highlighting row {row_number} in blue: {e}")
 
 
 def setup_driver(service, options):
     from selenium import webdriver
     return webdriver.Chrome(service=service, options=options)
+
 def speed_test(driver):
     # Wait for the button to be clickable
     ok_button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
@@ -179,6 +162,7 @@ def image_to_coordinates(image_path, threshold=128):
     centered_coordinates = [(x - min_x, y - min_y) for x, y in coordinates]
 
     return centered_coordinates
+
 def scale_coordinates(coordinates, canvas_size):
     max_x = max(coord[0] for coord in coordinates)
     max_y = max(coord[1] for coord in coordinates)
@@ -189,6 +173,7 @@ def scale_coordinates(coordinates, canvas_size):
 
     scaled_coordinates = [(int(x * scale_factor), int(y * scale_factor)) for x, y in coordinates]
     return scaled_coordinates
+
 def center_coordinates(coordinates, canvas_size):
     min_x = min(coord[0] for coord in coordinates)
     min_y = min(coord[1] for coord in coordinates)
@@ -212,6 +197,7 @@ def normalize_coordinates(coordinates, canvas_size):
         normalized_y = int(y * canvas_height / max_y) if max_y > 0 else 0
         normalized.append((normalized_x, normalized_y))
     return normalized
+
 # Function to generate JavaScript for drawing signature
 def generate_signature_js(image_path, canvas_width=512, canvas_height=220):
     with open(image_path, "rb") as img_file:
@@ -236,7 +222,7 @@ def draw_signature(driver):
         canvas.click()
 
         # Generate and inject JavaScript
-        signature_js = generate_signature_js("C:\\Users\\casas\\Desktop\\a sig .png")
+        signature_js = generate_signature_js("C:\\Users\\amberz\\Desktop\\sig.png")
         driver.execute_script(signature_js)
         print("Signature added successfully.")
         
@@ -245,7 +231,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's first name
         first_name_input.clear()
-        first_name_input.send_keys("Andrew Carrillo")
+        first_name_input.send_keys("Amber Patricia")
         print("Agent's first name entered successfully.")
         time.sleep(DELAY)
 
@@ -254,7 +240,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's last name
         last_name_input.clear()
-        last_name_input.send_keys("Blackhorse")
+        last_name_input.send_keys("Anguiano")
         print("Agent's last name entered successfully.")
         time.sleep(DELAY)
 
@@ -263,7 +249,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's location
         location_input.clear()
-        location_input.send_keys("Winnetka")
+        location_input.send_keys("Los Angeles")
         print("Agent's location entered successfully.")
         time.sleep(DELAY)
 
@@ -272,7 +258,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's address
         address_input.clear()
-        address_input.send_keys("19725 Vanowen St")
+        address_input.send_keys("3425 Whittier Blvd")
         print("Agent's address entered successfully.")
         time.sleep(DELAY)
 
@@ -384,7 +370,7 @@ def eligibility_page(driver):
 def demographic_page(driver, row_number,address_row):
     try:
         # Access the Google Sheet
-        spreadsheet = client.open("Shijuana Tinoco Leads")  # Replace with your sheet's actual name
+        spreadsheet = client.open("Amber Leads")  # Replace with your sheet's actual name
         sheet = spreadsheet.sheet1  # Access the first sheet in the file
         row_data = sheet.row_values(row_number)  # Retrieve the row based on row_number
         address_data = sheet.row_values(address_row)  # Address details
@@ -473,12 +459,12 @@ def demographic_page(driver, row_number,address_row):
         # Press left arrow key 4 times
         for _ in range(4):
             ssn_field.send_keys(Keys.ARROW_LEFT)
-            time.sleep(1)  # Optional delay for visibility
+            time.sleep(.5)  # Optional delay for visibility
 
         # Input the SSN character by character
         for char in ssn_value:
             ssn_field.send_keys(char)
-            time.sleep(.7)
+            time.sleep(.5)
         
         print("SSN field successfully filled.")
 
@@ -618,6 +604,10 @@ def popup_check(driver):
                 print("already a user")
                 driver.back()
                 return True
+            elif "we are unable to enroll you in the federal program at this time" in normalized_text:
+                print("already a user")
+                driver.back()
+                return True
             elif "validation successful" in normalized_text:
                 print("validation successful")
                 # Wait for the button to be clickable
@@ -642,18 +632,32 @@ def popup_check(driver):
 
 def disclosures_page(driver):
     try:
-        print('disclosures page started')
+                # Wait until the <h1> element with the text "Disclosures" appears on the screen
+        try:
+            # Wait until the <h1> element with class "title" is visible and contains "Disclosures"
+            element = WebDriverWait(driver, 0).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.title"))  # Wait for element to appear
+            )
+            
+            # Wait for the text inside the element to be "Disclosures"
+            WebDriverWait(driver, 0).until(
+                EC.text_to_be_present_in_element((By.CSS_SELECTOR, "h1.title"), "Disclosures")
+            )
+            print('disclosures page started')
+        except Exception as e:
+            print(f"Error: {e}")
+        
 
         try:
             # Locate and click 'IehAnotherAdultYes' radio button
-            IehAnotherAdult = WebDriverWait(driver, 15).until(
+            IehAnotherAdult = WebDriverWait(driver, .5).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehAnotherAdultYes"]'))
             )
             IehAnotherAdult.click()
             print("Clicked the 'IehAnotherAdultYes' radio button successfully.")
         except TimeoutException:
             print("'IehAnotherAdultYes' radio button not found. Continuing...")
-
+ 
         try:
             # Locate and click 'IehDiscountNo' radio button
             IehDiscount = WebDriverWait(driver, 1).until(
@@ -728,10 +732,10 @@ def disclosures_page(driver):
         raise
 
 def wait_for_user():
-    print("Waiting... Type 'good' to proceed.")
+    print("Waiting... Type '1' to proceed.")
     while True:
-        user_input = input("Type 'good' to continue: ").strip().lower()
-        if user_input == "good":
+        user_input = input("Type '1' to continue: ").strip().lower()
+        if user_input == "1":
             break  # Exit loop when "good" is entered
         
 
@@ -762,16 +766,18 @@ def upload_file(driver, file_path):
 
 def get_random_jpg(folder_path):
     """
-    Picks a random .jpg file from the given folder.
-    
-    :param folder_path: Path to the folder containing .jpg images.
-    :return: Full path of a randomly selected .jpg file.
+    Picks a random .jpg or .jpeg file from the given folder.
+
+    :param folder_path: Path to the folder containing image files.
+    :return: Full path of a randomly selected .jpg or .jpeg file.
     """
     try:
-        jpg_files = [f for f in os.listdir(folder_path) if f.lower().endswith('.jpg')]
-        if not jpg_files:
-            raise FileNotFoundError("No .jpg files found in the folder.")
-        return os.path.join(folder_path, random.choice(jpg_files))
+        # Include both .jpg and .jpeg extensions
+        image_files = [f for f in os.listdir(folder_path)
+                       if f.lower().endswith(('.jpg', '.jpeg'))]
+        if not image_files:
+            raise FileNotFoundError("No .jpg or .jpeg files found in the folder.")
+        return os.path.join(folder_path, random.choice(image_files))
     except Exception as e:
         print(f"Error selecting random image: {e}")
         return None
@@ -779,22 +785,26 @@ def get_random_jpg(folder_path):
 
 def service_type_check(driver,file_path):
     try:
-        print("Checking service type page...")
-        '''
         try:
-            # Check if the element exists
-            current_esn = WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[formcontrolname="CurrentEsn"]')))
-            if current_esn:
-                print("Instant Approval")
-                return  # Exit the function if the element is found
-        except TimeoutException:
-            print("not instant approval")
-        '''
+            # Wait until the <h1> element with class "title" is visible and contains "Image Capture"
+            element = WebDriverWait(driver, 0).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.title"))  # Wait for element to appear
+            )
+            
+            # Wait for the text inside the element to be "Image Capture"
+            WebDriverWait(driver, 0).until(
+                EC.text_to_be_present_in_element((By.CSS_SELECTOR, "h1.title"), "Image Capture")
+            )
+            
+            print("Element is fully loaded and text is 'Image Capture'.")
+    
+        except Exception as e:
+            print(f"Error: {e}")
 
 
         try:
             # Check for "Proof of Identification"
-            proof_id_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Identification')]")))
+            proof_id_element = WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Identification')]")))
             if proof_id_element and "Proof of Identification" in proof_id_element.text:
                 print("Proof of Identification, cannot run app")
                 # Navigate back once
@@ -820,7 +830,7 @@ def service_type_check(driver,file_path):
 
         try:
             # Check for "Proof of Identification"
-            proof_calfresh_element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'CalFresh')]")))
+            proof_calfresh_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'CalFresh')]")))
             if proof_calfresh_element and "CalFresh" in proof_calfresh_element.text:
                 print("Proof of CALFRESH, cannot run app")
                 # Navigate back once
@@ -843,11 +853,20 @@ def service_type_check(driver,file_path):
                 return True  # Indicate the element was found
         except:
             pass  # Move to next check if element is not found
+
+        try:
+            # Check for "Proof of Identification"
+            proof_address_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Address')]")))
+            if proof_address_element and "CalFresh" in proof_address_element.text:
+                print("Proof of Address, change address to a good one")
+                wait_for_user()
+        except:
+            pass  # Move to next check if element is not found
         
 
         try:
             # Check for "Agent Selfie"
-            agent_selfie_element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Agent Selfie')]")))
+            agent_selfie_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Agent Selfie')]")))
             if agent_selfie_element and "Agent Selfie" in agent_selfie_element.text:
                 print ("Agent Selfie Only, good app")
                 time.sleep(1)
@@ -882,7 +901,7 @@ def finish_process(driver, esn_row, imei_row):
             client = gspread.authorize(creds)
             print("Google Sheets access authorized successfully.")
 
-            inventory_spreadsheet = client.open("Shijuana Tinoco Inv")  # Replace with your sheet's actual name
+            inventory_spreadsheet = client.open("Amber Inv")  # Replace with your sheet's actual name
             inv_sheet = inventory_spreadsheet.sheet1  # Access the first sheet in the file
             esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on esn_row_number
            
@@ -938,15 +957,13 @@ def finish_process(driver, esn_row, imei_row):
                     ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))
                     time.sleep(1)      
                     ok_button.click()
-                    time.sleep(1)
-                    highlight_cell_red(inv_sheet,esn_row_inv[1])    
+                    time.sleep(1)  
                     esn_not_valid = True   
                 else:
                     print("Modal text does not contain 'not found'.")
                     # Example: Click the OK button
                     ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))      
                     ok_button.click()
-                    highlight_cell_green(inv_sheet, esn_row_inv[1])
                     esn_not_valid = False
             except Exception as e:
                 print("Error handling 'not found' modal:", e)
@@ -1003,14 +1020,12 @@ def finish_process(driver, esn_row, imei_row):
                     time.sleep(1)      
                     ok_button.click()
                     time.sleep(1)
-                    highlight_cell_red(inv_sheet,imei_row_inv[1])    
                     imei_not_valid = True   
                 else:
                     print("Modal text does not contain 'not found'.")
                     # Example: Click the OK button
                     ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]')))      
                     ok_button.click()
-                    highlight_cell_green(inv_sheet, imei_row_inv[1])
                     imei_not_valid = False
             except Exception as e:
                 print("Error handling 'not found' modal:", e)
@@ -1085,12 +1100,12 @@ def finish_process(driver, esn_row, imei_row):
         except Exception as e:
             print(f"Error clicking 'Submit Order' button: {e}")
             return
-        print ("order complete wait 5-6 min and new app will start")
+        print ("order complete wait 10-13 min and new app will start")
         
         highlight_row_green(inv_sheet,esn_row)
         
         #timer inbetween apps
-        time.sleep(random.randint(300,360))
+        time.sleep(random.randint(900,1200))
         
         # Locate the 'New Order' link using its attributes
         new_order_link = WebDriverWait(driver, 10).until(
@@ -1103,3 +1118,4 @@ def finish_process(driver, esn_row, imei_row):
 
     except Exception as e:
         print(f"General error in finish_process: {e}")
+
