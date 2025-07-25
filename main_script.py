@@ -31,8 +31,12 @@ except ValueError:
     exit(1)
 
 # Set up ChromeDriver service
-chrome_service = Service("C:\\Users\\casas\\Desktop\\chromedriver-win64\\chromedriver.exe")
+chrome_service = Service("C:\\Users\\amberz\\Desktop\\chromedriver-win64\\chromedriver.exe")
 chrome_options = Options()
+
+# Add unpacked extensions (your two extensions)
+extension_2 = "C:\\Users\\amberz\\AppData\\Local\\Google\\Chrome\\User Data\Default\\Extensions\\fcalilbnpkfikdppppppchmkdipibalb\\1.2.1_0"
+chrome_options.add_argument(f"--load-extension=,{extension_2}")
 
 # Initialize the driver with geolocation
 driver = setup_driver_with_geolocation(chrome_service, chrome_options, latitude, longitude)
@@ -40,9 +44,13 @@ tracker = 0 #complete application tracker
 
 #file_path = "C:\\Users\\casas\\Desktop\\IMG_0472.jpg"
 
-folder_path = "C:\\path\\to\\your\\images"  # Change to your actual folder path
+folder_path = "C:\\Users\\amberz\\Desktop\\images"  # Change to your actual folder path
+
 
 try:
+    wait_for_user()
+    wait_for_user()
+
     # Open the application page
     driver.get("https://app.cgmllc.net/")
     WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
@@ -51,12 +59,12 @@ try:
     # Bypass speed test screen
     speed_test(driver)
 
-    # Log in to the application
-    login(driver, "V1_AndrewCarrilloBlackhorse", "Water123!!")
+    # Log in to the application7854
+    login(driver, "V1_Amberpatriciaanguiano", "Water1233!")
 
     row_number = 1  # Start with the first row
     address_row = 2  # Start with the first row for address details
-    spreadsheet = client.open("Shijuana Tinoco Leads")  # Replace with your sheet's actual name
+    spreadsheet = client.open("Amber Leads")  # Replace with your sheet's actual name
     sheet = spreadsheet.sheet1  # Access the first sheet in the file
     esn_row = 1
     imei_row = 1 
