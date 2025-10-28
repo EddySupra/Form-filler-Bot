@@ -1,26 +1,35 @@
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from form_functions import *
 import time
+import random
 
-def setup_driver_with_geolocation(service, options, latitude, longitude, accuracy=100):
+def setup_driver_with_geolocation(latitude, longitude, accuracy=100):
     """
-    Set up the WebDriver with geolocation override.
+    Set up an undetected Chrome WebDriver with geolocation override.
     """
-    driver = webdriver.Chrome(service=service, options=options)
+    options = uc.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--start-maximized")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
+
+    # Optional: set Chrome binary location (if needed)
+    options.binary_location = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+
+    driver = uc.Chrome(options=options)
 
     # Set geolocation
-    params = {
+    driver.execute_cdp_cmd("Emulation.setGeolocationOverride", {
         "latitude": latitude,
         "longitude": longitude,
         "accuracy": accuracy
-    }
-    driver.execute_cdp_cmd("Emulation.setGeolocationOverride", params)
+    })
     print(f"Geolocation set to Latitude: {latitude}, Longitude: {longitude}, Accuracy: {accuracy}")
     return driver
+
 
 # Prompt user for geolocation input
 try:
@@ -30,21 +39,19 @@ except ValueError:
     print("Invalid input. Please enter numerical values for latitude and longitude.")
     exit(1)
 
-# Set up ChromeDriver service
-chrome_service = Service("C:\\Users\\amberz\\Desktop\\chromedriver-win64\\chromedriver.exe")
+# --- build chrome options ---
 chrome_options = Options()
 
-# Add unpacked extensions (your two extensions)
-extension_2 = "C:\\Users\\amberz\\AppData\\Local\\Google\\Chrome\\User Data\Default\\Extensions\\fcalilbnpkfikdppppppchmkdipibalb\\1.2.1_0"
-chrome_options.add_argument(f"--load-extension=,{extension_2}")
+# 1) point to your actual Chrome install:
+chrome_options.binary_location = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 
-# Initialize the driver with geolocation
-driver = setup_driver_with_geolocation(chrome_service, chrome_options, latitude, longitude)
+# Setup driver
+driver = setup_driver_with_geolocation(latitude, longitude, accuracy=100)
 tracker = 0 #complete application tracker
 
 #file_path = "C:\\Users\\casas\\Desktop\\IMG_0472.jpg"
 
-folder_path = "C:\\Users\\amberz\\Desktop\\images"  # Change to your actual folder path
+folder_path = "C:\\Users\\Work\\Desktop\\IMAGES"  # Change to your actual folder path
 
 
 try:
@@ -56,15 +63,16 @@ try:
     WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     print("Application page loaded.")
     
+    
     # Bypass speed test screen
     speed_test(driver)
 
     # Log in to the application7854
-    login(driver, "V1_Amberpatriciaanguiano", "Water1233!")
+    login(driver, "V1_Samanthacruz1", "Water1233!!")
 
     row_number = 1  # Start with the first row
-    address_row = 2  # Start with the first row for address details
-    spreadsheet = client.open("Amber Leads")  # Replace with your sheet's actual name
+    address_row = 1  # Start with the first row for address details
+    spreadsheet = client.open("Sam Leads")  # Replace with your sheet's actual name
     sheet = spreadsheet.sheet1  # Access the first sheet in the file
     esn_row = 1
     imei_row = 1 
@@ -82,6 +90,8 @@ try:
 
                     # Increment row_number for each new person
                     row_number += 1
+                    address_row +=1
+
                     print("Filling out eligibility page...")
                     eligibility_page(driver)
 
