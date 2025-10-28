@@ -35,7 +35,7 @@ print("Google Sheets access")
 
 
 # Delay for program actions 2 - 4 secconds 
-DELAY = .5
+DELAY = 1 
 
 class PopupCheckException(Exception):
     """Raised when a pop-up is detected during demographic_page processing."""
@@ -97,6 +97,27 @@ def highlight_row_blue(sheet, row_number):
         print(f"Row {row_number} has been highlighted in blue.")
     except Exception as e:
         print(f"Error while highlighting row {row_number} in blue: {e}")
+
+def safe_click(driver, element, timeout=10):
+    """
+    Clicks an element safely, waiting for Angular modals/overlays to disappear first.
+    """
+    try:
+        # Wait until no modal overlays are present
+        WebDriverWait(driver, timeout).until_not(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "app-modal, .cdk-overlay-backdrop, .modal-backdrop"))
+        )
+
+        # Scroll into view and try normal click
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        time.sleep(0.3)
+        element.click()
+    except Exception as e:
+        print(f"Standard click failed ({e}); retrying with JS click.")
+        try:
+            driver.execute_script("arguments[0].click();", element)
+        except Exception as js_e:
+            print(f"JS click also failed: {js_e}")
 
 
 def setup_driver(service, options):
@@ -222,7 +243,7 @@ def draw_signature(driver):
         canvas.click()
 
         # Generate and inject JavaScript
-        signature_js = generate_signature_js("C:\\Users\\amberz\\Desktop\\sig.png")
+        signature_js = generate_signature_js("C:\\Users\\Work\\Desktop\\sig.png")
         driver.execute_script(signature_js)
         print("Signature added successfully.")
         
@@ -231,7 +252,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's first name
         first_name_input.clear()
-        first_name_input.send_keys("Amber Patricia")
+        first_name_input.send_keys("Samantha")
         print("Agent's first name entered successfully.")
         time.sleep(DELAY)
 
@@ -240,7 +261,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's last name
         last_name_input.clear()
-        last_name_input.send_keys("Anguiano")
+        last_name_input.send_keys("Cruz")
         print("Agent's last name entered successfully.")
         time.sleep(DELAY)
 
@@ -249,7 +270,7 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's location
         location_input.clear()
-        location_input.send_keys("Los Angeles")
+        location_input.send_keys("Upland")
         print("Agent's location entered successfully.")
         time.sleep(DELAY)
 
@@ -258,20 +279,24 @@ def draw_signature(driver):
 
         # Clear the input field and type agent's address
         address_input.clear()
-        address_input.send_keys("3425 Whittier Blvd")
+        address_input.send_keys("1931 N Campus Ave")
         print("Agent's address entered successfully.")
         time.sleep(DELAY)
 
-        # Wait for the dropdown element to be present and visible
-        state_dropdown = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "state")))
-
-        # Create a Select object from the dropdown element
-        select = Select(state_dropdown)
-
-        # Select the option with value "CA"
-        select.select_by_value("CA")
-        print("California (CA) selected successfully.")
-        time.sleep(DELAY)
+        try:
+            # Try to wait for the dropdown element up to 10 seconds
+            state_dropdown = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.NAME, "state"))
+            )
+            select = Select(state_dropdown)
+            select.select_by_value("CA")
+            print("California (CA) selected successfully.")
+        except TimeoutException:
+            print("State dropdown not found on this page. Skipping state selection.")
+        except NoSuchElementException:
+            print("The 'CA' option was not found in the dropdown.")
+        finally:
+            time.sleep(1)
 
         # Click start order
         start_order = driver.find_element(By.CSS_SELECTOR, ".btn.submit-btn.step-btn")
@@ -286,6 +311,7 @@ def draw_signature(driver):
 def eligibility_page(driver):
     try:
         print("print eligibility page started")
+        '''
         #BYOD question 
         # Wait for the element to be present and visible
         byod_button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "label[for='byodNo']")))
@@ -298,10 +324,10 @@ def eligibility_page(driver):
             time.sleep(.5)
         else:
             print("BYOD NO is already selected.")
-            time.sleep(.5)
+            time.sleep(.5)'''
 
         # Another CA Enrollment Answer No
-        another_ca_input = driver.find_element(By.CSS_SELECTOR, "input#AnotherCaEnrollmentAnswerNo")
+        another_ca_input  = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input#AnotherCaEnrollmentAnswerNo")))
         if not another_ca_input.is_selected():
             print("Another CA Enrollment Answer 'No' is not selected. Clicking it now.")
             another_ca_label = driver.find_element(By.CSS_SELECTOR, "label[for='AnotherCaEnrollmentAnswerNo']")
@@ -370,7 +396,7 @@ def eligibility_page(driver):
 def demographic_page(driver, row_number,address_row):
     try:
         # Access the Google Sheet
-        spreadsheet = client.open("Amber Leads")  # Replace with your sheet's actual name
+        spreadsheet = client.open("Elsa Leads")  # Replace with your sheet's actual name
         sheet = spreadsheet.sheet1  # Access the first sheet in the file
         row_data = sheet.row_values(row_number)  # Retrieve the row based on row_number
         address_data = sheet.row_values(address_row)  # Address details
@@ -416,7 +442,7 @@ def demographic_page(driver, row_number,address_row):
         day_dropdown_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[formcontrolname="day"]')))
         day_dropdown = Select(day_dropdown_element)
         day_dropdown.select_by_value(day.lstrip("0"))  # Remove leading zeros
-        time.sleep(.5)
+        time.sleep(1)
 
         # Wait for and select the year
         year_dropdown_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[formcontrolname="year"]')))
@@ -475,27 +501,28 @@ def demographic_page(driver, row_number,address_row):
         # Billing Address
         BillingAddressLabel = driver.find_element(By.CSS_SELECTOR, 'label[for="billingAddressSame"]')
         BillingAddressLabel.click()
+        time.sleep(1)
         
 
         # Permanent Address
         PermanentAddress = driver.find_element(By.CSS_SELECTOR, 'label[for="permanent"]')
         PermanentAddress.click()
-        
+        time.sleep(1)
 
         # Shipping Address
         ShippingAddress = driver.find_element(By.CSS_SELECTOR, 'label[for="shippingAddressSameResidence"]')
         ShippingAddress.click()
-        
+        time.sleep(1)
 
         # Email button
         Email = driver.find_element(By.CSS_SELECTOR, 'label[for="reachQuestionEmail"]')
         Email.click()
-        
+        time.sleep(1)
 
         #Wait for the checkbox to be present and visible
         marketing_checkbox = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "label[for='MarketingConsent']")))
         marketing_checkbox.click()
-       
+        time.sleep(1)
 
         #Next Page 
         next_button = driver.find_element(By.CSS_SELECTOR, "button.btn.submit-btn.step-btn")
@@ -538,14 +565,12 @@ def popup_check(driver):
                 print("Person cannot register at this time. Moving on to next.")
                 time.sleep(1)
                 return True
-            
-            elif "in order to continue this enrollment with entouch" in normalized_text:
+            elif "in order to continue this enrollment with entouch," in normalized_text:
                 time.sleep(1)
                 print("please have the customer contact Enrollment Support .")
                 driver.back()
                 time.sleep(1)
                 return True
-            
             elif "duplicate customer found in entouch wireless" in normalized_text:
                 print("duplicate customer found entouch.")
                 driver.back()
@@ -585,20 +610,24 @@ def popup_check(driver):
                 
             elif "you are already receiving a lifeline discount benefit" in normalized_text:
                 print("Transfer is available.")
-                # Wait for the "Yes" button to be clickable
-                yes_button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, "//button[text()='Yes' and @class='btn btn-flat' and @type='button']"))
-                )
-                # Click the button
-                time.sleep(1)
-                yes_button.click()
-                time.sleep(1)
-                print("Yes button clicked successfully.")
-                return False
+                driver.back()
+                return True
             elif " an error has occurred " in normalized_text:
                 print("application error has occured ")
                 driver.back()
                 return True
+            elif "We were unable to confirm the address provided with the united states postal service. if you wish to modify the address, click modify. if the address is correct as entered, to complete your order," in normalized_text:
+                print("cant confirm address will ask for proof")
+                # Wait for the button to be clickable
+                time.sleep(1)
+                ok_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat")))
+
+                # Click the button
+                time.sleep(1)
+                ok_button.click()
+                time.sleep(1)
+                print("OK button clicked successfully.")
+                
 
             elif "the california lifeline administrator has determined you already have an application" in normalized_text:
                 print("already a user")
@@ -621,8 +650,49 @@ def popup_check(driver):
                 driver.back()
                 return True
             elif "we were unable to confirm the address provided with the united states postal service" in normalized_text:
-                print("bad address!")
+                print("Bad Address, Modify it to good one ")
+                # Wait for the OK button to be clickable
+                ok_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/simple-modal-holder/simple-modal-wrapper/div/app-modal/div/div/div[3]/button[1]"))
+                )
 
+                # Scroll it into view
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", ok_button)
+                time.sleep(2)
+
+                # Try normal click first
+                try:
+                    ok_button.click()
+                    print("✅ Clicked 'OK' button normally.")
+                except Exception as e:
+                    print(f"⚠️ Normal click failed: {e}")
+                    try:
+                        # Try ActionChains click
+                        actions = ActionChains(driver)
+                        actions.move_to_element(ok_button).pause(0.2).click().perform()
+                        print("✅ Clicked 'OK' button with ActionChains.")
+                    except Exception as e2:
+                        print(f"⚠️ ActionChains click failed: {e2}")
+                        # Final fallback — JavaScript click
+                        driver.execute_script("arguments[0].click();", ok_button)
+                        print("✅ Clicked 'OK' button with JavaScript.")
+                return False
+            elif "you can apply for lifeline. you live in a household that does not get lifeline"in normalized_text:
+                # Wait until any modals or overlays disappear
+                WebDriverWait(driver, timeout).until_not(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "app-modal, .cdk-overlay-backdrop, .modal-backdrop"))
+                )
+
+                # Wait for the OK button to be clickable
+                ok_button = WebDriverWait(driver, timeout).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-flat[type='button']"))
+                )
+
+                # Scroll into view and click safely
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", ok_button)
+                time.sleep(3)
+                ok_button.click()
+                print("✅ OK button clicked successfully.")
             else:
                 print("Unhandled pop-up message detected.")
                 return False
@@ -640,7 +710,7 @@ def disclosures_page(driver):
             )
             
             # Wait for the text inside the element to be "Disclosures"
-            WebDriverWait(driver, 0).until(
+            WebDriverWait(driver, 15).until(
                 EC.text_to_be_present_in_element((By.CSS_SELECTOR, "h1.title"), "Disclosures")
             )
             print('disclosures page started')
@@ -650,10 +720,10 @@ def disclosures_page(driver):
 
         try:
             # Locate and click 'IehAnotherAdultYes' radio button
-            IehAnotherAdult = WebDriverWait(driver, .5).until(
+            IehAnotherAdult = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehAnotherAdultYes"]'))
             )
-            IehAnotherAdult.click()
+            safe_click(driver, IehAnotherAdult)
             print("Clicked the 'IehAnotherAdultYes' radio button successfully.")
         except TimeoutException:
             print("'IehAnotherAdultYes' radio button not found. Continuing...")
@@ -663,26 +733,36 @@ def disclosures_page(driver):
             IehDiscount = WebDriverWait(driver, 1).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'label[for="IehDiscountNo"]'))
             )
-            IehDiscount.click()
+            safe_click(driver, IehDiscount)
             print("Clicked the 'IehDiscountNo' radio button successfully.")
-        except TimeoutException:
-            print("'IehDiscountNo' radio button not found. Continuing...")
 
-        try:
-            # Locate and click the 'Ok' button
-            ok_button = WebDriverWait(driver, 1).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-flat[type="button"]'))
-            )
-            ok_button.click()
-            print("Clicked the 'Ok' button successfully.")
+            time.sleep(1)
+
+            try:
+                ok_button = WebDriverWait(driver, 7).until(
+                    EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/simple-modal-holder/simple-modal-wrapper/div/app-modal/div/div/div[3]/button'))
+                )
+                driver.execute_script("arguments[0].scrollIntoView(true);", ok_button)
+                time.sleep(0.5)
+
+                actions = ActionChains(driver)
+                actions.move_to_element(ok_button).click().perform()
+                print("✅ 'Ok' button clicked with ActionChains.")
+                time.sleep(1)
+
+            except Exception as e:
+                print(f"⚠️ Could not click 'Ok' button with ActionChains: {e}")
+
         except TimeoutException:
-            print("'Ok' button not found. Continuing...")
+                print("'IehDiscountNo' radio button not found. Continuing...")
+
         # Try to locate and click the 'CertificationB' checkbox
         try:
             certification_checkbox = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'label[for="CertificationB"]'))
             )
-            certification_checkbox.click()
+            time.sleep(1)
+            safe_click(driver,certification_checkbox)
             print("Clicked the 'CertificationB' checkbox successfully.")
         except TimeoutException:
             print("'CertificationB' checkbox not found. Continuing...")
@@ -694,7 +774,7 @@ def disclosures_page(driver):
             'disclosures13', 'disclosures14', 'disclosures15', 'disclosures16',
             'disclosures17', 'disclosures18', 'disclosures19', 'disclosures21',
             'disclosures22', 'disclosures24', 'disclosures25', 'disclosures26',
-            'disclosures27', 'disclosures28'
+            'disclosures27', 'disclosures28', 'disclosures23', 'disclosures29'
         ]
 
         try:
@@ -706,7 +786,7 @@ def disclosures_page(driver):
             # Click each label
             for label in labels:
                 try:
-                    label.click()
+                    safe_click(driver, label)
                     print(f"Clicked the label successfully: {label.get_attribute('for')}")
                 except Exception as e:
                     print(f"Error clicking label '{label.get_attribute('for')}': {e}")
@@ -714,22 +794,38 @@ def disclosures_page(driver):
         except TimeoutException:
             print("Some or all disclosure labels not found.")
 
+                # Wait for the canvas to be present
+        canvas = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.TAG_NAME, "canvas"))
+        )
+        safe_click(driver, canvas)
+
+        # Generate and inject JavaScript
+        signature_js = generate_signature_js("C:\\Users\\Work\\Desktop\\sig.png")
+        driver.execute_script(signature_js)
+        print("Signature added successfully.")
+
         # Try to locate and click the 'I Accept' button
         try:
             accept_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.submit-btn.step-btn'))
             )
-            accept_button.click()
+            safe_click(driver, accept_button)
+            
             print("Clicked the 'I Accept' button successfully.")
             time.sleep(1)
         except TimeoutException:
             print("'I Accept' button not found. Continuing...")
+
         print ("Disclosure page done")
         time.sleep(1)
         
     except Exception as e:
         print("Error during elegiblity", e)
         raise
+
+
+
 
 def wait_for_user():
     print("Waiting... Type '1' to proceed.")
@@ -783,12 +879,12 @@ def get_random_jpg(folder_path):
         return None
 
 
-def service_type_check(driver,file_path):
+def service_type_check(driver, file_path):
     try:
         try:
             # Wait until the <h1> element with class "title" is visible and contains "Image Capture"
             element = WebDriverWait(driver, 0).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.title"))  # Wait for element to appear
+                EC.presence_of_element_located((By.CSS_SELECTOR, "h1.title"))
             )
             
             # Wait for the text inside the element to be "Image Capture"
@@ -801,85 +897,90 @@ def service_type_check(driver,file_path):
         except Exception as e:
             print(f"Error: {e}")
 
-
+        # -------------------------
+        # Check for "Proof of Identification"
+        # -------------------------
         try:
-            # Check for "Proof of Identification"
-            proof_id_element = WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Identification')]")))
+            proof_id_element = WebDriverWait(driver, 1).until(
+                EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Identification')]"))
+            )
             if proof_id_element and "Proof of Identification" in proof_id_element.text:
                 print("Proof of Identification, cannot run app")
-                # Navigate back once
-                driver.back()
-                print("Navigated back once.")
-
-                # Pause briefly to ensure the page loads
-                time.sleep(1)
-
-                # Navigate back a second time
-                driver.back()
-                print("Navigated back twice.")
-
-                time.sleep(1)
-
-                # Navigate back a third time
-                driver.back()
-                print("Navigated back three times.")
-
-                return True  # Indicate the element was found
+                for i in range(3):
+                    driver.back()
+                    print(f"Navigated back {i+1} time(s).")
+                    time.sleep(1)
+                return True
         except:
-            pass  # Move to next check if element is not found
+            pass
 
+        # -------------------------
+        # Check for "CalFresh"
+        # -------------------------
         try:
-            # Check for "Proof of Identification"
-            proof_calfresh_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'CalFresh')]")))
+            proof_calfresh_element = WebDriverWait(driver, 0.5).until(
+                EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'CalFresh')]"))
+            )
             if proof_calfresh_element and "CalFresh" in proof_calfresh_element.text:
                 print("Proof of CALFRESH, cannot run app")
-                # Navigate back once
-                driver.back()
-                print("Navigated back once.")
-
-                # Pause briefly to ensure the page loads
-                time.sleep(1)
-
-                # Navigate back a second time
-                driver.back()
-                print("Navigated back twice.")
-
-                time.sleep(1)
-
-                # Navigate back a third time
-                driver.back()
-                print("Navigated back three times.")
-
-                return True  # Indicate the element was found
+                for i in range(3):
+                    driver.back()
+                    print(f"Navigated back {i+1} time(s).")
+                    time.sleep(1)
+                return True
         except:
-            pass  # Move to next check if element is not found
+            pass
 
+        # -------------------------
+        # Check for "Address Proof"
+        # -------------------------
+        proof_address_present = False
         try:
-            # Check for "Proof of Identification"
-            proof_address_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Proof of Address')]")))
-            if proof_address_element and "CalFresh" in proof_address_element.text:
-                print("Proof of Address, change address to a good one")
-                wait_for_user()
+            proof_address_element = WebDriverWait(driver, 0.5).until(
+                EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Address Proof')]"))
+            )
+            if proof_address_element and "Address Proof" in proof_address_element.text:
+                print("Proof of Address detected.")
+                proof_address_present = True
         except:
-            pass  # Move to next check if element is not found
-        
+            pass
 
+        # -------------------------
+        # Check for "Agent Selfie"
+        # -------------------------
         try:
-            # Check for "Agent Selfie"
-            agent_selfie_element = WebDriverWait(driver, .5).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Agent Selfie')]")))
+            agent_selfie_present = False
+            agent_selfie_element = WebDriverWait(driver, 0.5).until(
+                EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Agent Selfie')]"))
+            )
             if agent_selfie_element and "Agent Selfie" in agent_selfie_element.text:
-                print ("Agent Selfie Only, good app")
-                time.sleep(1)
-                print("start code for image input")
-                upload_file(driver, file_path)
-
-                print("please click submit button")
-                return False
+                agent_selfie_present = True
         except:
-            print ("error cannont detect image capture type")
-   
+            pass
+
+        # -------------------------
+        # If Agent Selfie is present (alone or with Address Proof)
+        # -------------------------
+        if proof_address_present and agent_selfie_present:
+            print("Both 'Proof of Address' and 'Agent Selfie' detected — treating as Agent Selfie Only.")
+        if agent_selfie_present:
+            print("Agent Selfie Only, good app")
+            time.sleep(1)
+            print("Start code for image input")
+            upload_file(driver, file_path)
+            print("Please click submit button")
+            return False
+
+        # -------------------------
+        # If only Address Proof without Agent Selfie
+        # -------------------------
+        if proof_address_present and not agent_selfie_present:
+            print("Proof of Address only — change address to a good one")
+            wait_for_user()
+
     except Exception as e:
-        print("Service type page check error or element not found.")
+        print("Service type page check error or element not found:", e)
+
 
 def finish_process(driver, esn_row, imei_row):
     try:
@@ -901,7 +1002,7 @@ def finish_process(driver, esn_row, imei_row):
             client = gspread.authorize(creds)
             print("Google Sheets access authorized successfully.")
 
-            inventory_spreadsheet = client.open("Amber Inv")  # Replace with your sheet's actual name
+            inventory_spreadsheet = client.open("Sam Inv")  # Replace with your sheet's actual name
             inv_sheet = inventory_spreadsheet.sheet1  # Access the first sheet in the file
             esn_row_inv = inv_sheet.row_values(esn_row)  # Retrieve the esn row based on esn_row_number
            
@@ -1100,12 +1201,12 @@ def finish_process(driver, esn_row, imei_row):
         except Exception as e:
             print(f"Error clicking 'Submit Order' button: {e}")
             return
-        print ("order complete wait 10-13 min and new app will start")
+        print ("order complete wait 10-15 min and new app will start")
         
         highlight_row_green(inv_sheet,esn_row)
         
         #timer inbetween apps
-        time.sleep(random.randint(900,1200))
+        time.sleep(random.randint(600,900))
         
         # Locate the 'New Order' link using its attributes
         new_order_link = WebDriverWait(driver, 10).until(
@@ -1118,4 +1219,5 @@ def finish_process(driver, esn_row, imei_row):
 
     except Exception as e:
         print(f"General error in finish_process: {e}")
+
 
